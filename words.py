@@ -1,5 +1,6 @@
 import string
 import pickle
+import requests
 
 words=[]
 lastidused=-1
@@ -272,8 +273,29 @@ def refresh_weights(word_id):  #creates side lists of weights and weight ids
         a=a+1
 
 def correlated(word_id):
-    for x in words[word_id].connected_words:
-        print words[x].theword
+    a=0
+    
+    while a<len(words[word_id].adjusted_weight):
+        wordstring=words[words[word_id].connected_words[a]].theword
+        weight=words[word_id].adjusted_weight[a]
+        print wordstring + "  "+str(weight)
+        ws.append(wordstring)
+        we.append(weight)
+        a=a+1
+
+def print_weights(n):
+    a=0
+    while a<n:
+        print words[weight_ids[a]].theword+"  "+str(weights[a])
+        a=a+1
+  
+#def find(a,x): #in sorted list
+    
+    
+
+#def sortlist(x):
+    #p=[]
+    
 
 f=open('b.txt')
 data=f.read()
@@ -281,6 +303,19 @@ data=f.read()
 def refresh():
     calculate_weights()
     refresh_weights(-1)
-    
-    
 
+from HTMLParser import HTMLParser
+class MLStripper(HTMLParser):
+    def __init__(self):
+        self.reset()
+        self.fed = []
+    def handle_data(self, d):
+        self.fed.append(d)
+    def get_data(self):
+        return ''.join(self.fed)
+
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
+    
