@@ -8,12 +8,6 @@ weights=[]
 weight_ids=[]
 all_weights=0
 
-node_diminution= 0.2
-
-a='the cat has a wonderful hat'
-b='the man fed his cat'
-c='I went to school.  I was really hungry.  SO?'
-
 class word:
     id=-1
     theword=''
