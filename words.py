@@ -294,6 +294,11 @@ def print_weights(n):
 f=open('b.txt')
 data=f.read()
 
+def wordcheck(word):  #so you can input strings
+    a=findword(word)
+    if a>-1:   #meaning it has been found, -1 means not found
+        refresh_weights(a)
+
 def refresh():
     calculate_weights()
     refresh_weights(-1)
