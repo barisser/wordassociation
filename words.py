@@ -1,6 +1,7 @@
 import string
 import pickle
 import requests
+import math
 
 words=[]
 lastidused=-1
@@ -125,15 +126,16 @@ def read(txt):
     a=0
     h=len(s)
     while a<len(s):
-        print str(a) + " / "+str(h)
+        print str(a) + " / "+str(h) + " sentences read"
         read_sentence(s[a])
         a=a+1
+    refresh()
 
     #for a in s:
      #   read_sentence(a)
 
 
-def save():
+def save():  #saves WORD OBJECT list "WORDS", does not save weights or weight_ids which can be computed
     with open("words.dat","wb") as f:
         pickle.dump(words,f)
 
@@ -152,33 +154,70 @@ def findword(word):
         a=a+1
     return answer
 
+def findinlist(x,list):
+    b=len(list)
+    a=-1.5
+    if(b>0):
+        lowerbound=0
+        upperbound=b
+        a=(lowerbound+upperbound)/2
+        p=b
+        h=int(str(x).encode("hex"),32)
+        depth=0
+        g=0
+        cont=True
+        while(cont):
+            g=g+1
+            a=(lowerbound+upperbound)/2
+            hexa=int(str(list[a]).encode("hex"),32)
+            
+            if(h==hexa):
+                cont=False
+            elif(upperbound-lowerbound<2 and h>hexa):
+                cont=False
+                a=-upperbound
+            elif(upperbound-lowerbound<2 and h<hexa):
+                cont=False
+                a=-lowerbound
+            
+            elif(h<hexa):
+                
+                upperbound=a
+                                
+            elif(h>hexa):
+                
+                lowerbound=a
+            elif(g>math.log(b,2)*3):
+                cont=False
+                a=-1
+                    
+    return a
+
+
 def sort():   #sort weights and weight_ids lists
-    global words, weights, weight_ids
-    weights3=weights
-    weight_ids3=weight_ids
+    global weights, weight_ids
+
     weights2=[]
     weight_ids2=[]
     a=0
-    b=0
-    c=0
-    d=0
-    while d<len(weights):
-        a=0
-        b=0
-        c=0
-        while a<len(weights3):
-            if weights3[a]>b:
-                b=weights3[a]
-                c=a
-            a=a+1
+    while a<len(weights):
+        place=findinlist(weights[a],weights2)
+
+        if place==-1.5:  #list is totally empty
+            weights2.append(weights[a])
+            weight_ids2.append(weight_ids[a])
+        elif place<=0:  #does not exist in list, should usually be this
+            weights2.insert(-1*place, weights[a])
+            weight_ids2.insert(-1*place,weight_ids[a])
+        else:
+            weights2.insert(place,weights[a])
+            weight_ids2.insert(place,weight_ids[a])
         
-        weights2.append(b)
-        weight_ids2.append(weight_ids3[c])
-        del weights3[c]
-        del weight_ids3[c]
-        d=d+1
+        a=a+1
     weights=weights2
     weight_ids=weight_ids2
+
+   
 
 #call this before refresh_weights
 def calculate_weights():  #sum weights, individual totals, individual adjusted amts
@@ -194,16 +233,19 @@ def calculate_weights():  #sum weights, individual totals, individual adjusted a
         
         g=g+1
 
+    popularity_exponent = 0.5 #by what degree to penalize populat words, higher is more penalized
+    
+    number_of_words=len(words)
     f=0
     while f<len(words):        
         r=0
-        print f
+        print str(f)+ " / "+str(number_of_words)
         words[f].adjusted_weight=[] #reset this to be reconstituted each time
         while r<len(words[f].connected_words):
             internalratio=(float(words[f].connection_weight[r])/float(words[f].weight))
             toword=words[f].connected_words[r]
             massratio=float(words[toword].weight)/float(all_weights)+.001
-            adjusted=internalratio/massratio
+            adjusted=internalratio/math.pow(massratio,popularity_exponent)
             #print str(f)+ " to "+str(toword)+ " i: "+str(internalratio)+" / "+str(massratio)
             words[f].adjusted_weight.append(adjusted)
             r=r+1
@@ -215,7 +257,18 @@ def calculate_weights():  #sum weights, individual totals, individual adjusted a
         
         f=f+1
 
-    
+def add_weight_to_neighbors(word_id, factor):
+    for x in words[word_id].connected_words:
+        #find position in weight_ids
+        a=0
+        g=0
+        while a<len(weight_ids):
+            if weight_ids[a]==x: #you have found the correct index in weight_ids
+               g=a
+               a=len(weight_ids)
+            a=a+1
+        weights[g]=weights[g]+weights[word_id]*factor #your weight plus my weight times factor
+                
 
 def refresh_weights(word_id):  #creates side lists of weights and weight ids
                                  #call this before sort 
@@ -240,20 +293,22 @@ def refresh_weights(word_id):  #creates side lists of weights and weight ids
        while a<len(words[word_id].connected_words):  #for each connected word
             otherword=words[word_id].connected_words[a]
             theweight=words[word_id].adjusted_weight[a]
-
+            print a
             #find the position in weights to modify
             g=0
             s=0
             while g<len(weight_ids):
-                if g==otherword:
+                if weight_ids[g]==otherword:
                    s=g
                    g=len(weight_ids)
                 g=g+1
 
 
             #modify that weight
-            weights[s]=weights[s]*theweight/all_weights   #/node_diminution
+            #weights[s]=weights[s]*theweight/all_weights   #/node_diminution
             
+            weights[s]=weights[s]+theweight*all_weights
+            add_weight_to_neighbors(otherword,0.3)
             
             a=a+1
 
@@ -283,13 +338,6 @@ def print_weights(n):
         print words[weight_ids[a]].theword+"  "+str(weights[a])
         a=a+1
   
-#def find(a,x): #in sorted list
-    
-    
-
-#def sortlist(x):
-    #p=[]
-    
 
 f=open('b.txt')
 data=f.read()
@@ -298,10 +346,16 @@ def wordcheck(word):  #so you can input strings
     a=findword(word)
     if a>-1:   #meaning it has been found, -1 means not found
         refresh_weights(a)
+        #sort()
+        for x in weight_ids[0:10]:
+            print words[x].theword
+    
+        
 
 def refresh():
     calculate_weights()
     refresh_weights(-1)
+
 
 from HTMLParser import HTMLParser
 class MLStripper(HTMLParser):
@@ -317,4 +371,19 @@ def strip_tags(html):
     s = MLStripper()
     s.feed(html)
     return s.get_data()
-    
+
+def read_site(web_address):
+    a=requests.get(web_address)
+    print a.status_code
+    if a.status_code==200:
+        data=a.content
+        cleaned=strip_tags(data)
+        read(cleaned)
+
+a='the cat eats meat. '
+b= 'the cat also likes to go home. '
+c = 'meat is good for dogs and cats. '
+d= 'this guy has no home. '
+f=' the cat has a home for a home inside that place.'
+e=a+b+c+d+f
+read(e)
