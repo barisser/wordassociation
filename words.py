@@ -44,14 +44,14 @@ class word:
         if found==False:
             self.connected_words.append(towhom)
             self.connection_weight.append(1.0)
-        
+
 
 def printall():
     for x in words:
         print x.theword
 
 def break_into_sentences(txt):
-  
+
     global sofar, sentences
     sofar=''
     sentences=[]
@@ -62,7 +62,7 @@ def break_into_sentences(txt):
             sofar=''
         else:
            sofar=sofar+x
-            
+
     return sentences
 
 def parse_sentence(sentence):
@@ -93,10 +93,10 @@ def parse_sentence(sentence):
 
     return word_list2
 
-    
+
 
 def read_sentence(sentence):
-    
+
     global words, word_ids
     s_words=parse_sentence(sentence)
     word_ids=[]
@@ -105,7 +105,7 @@ def read_sentence(sentence):
     for x in s_words:
       #  print str(t)+ "  characters processed"
         t=t+1
-        
+
         found=False
         for y in words:
             if x==y.theword:
@@ -120,7 +120,7 @@ def read_sentence(sentence):
         for y in word_ids:
             if not x==y:
                 words[x].connect(y)
-    
+
 def read(txt):
     s=break_into_sentences(txt)
     a=0
@@ -170,7 +170,7 @@ def findinlist(x,list):
             g=g+1
             a=(lowerbound+upperbound)/2
             hexa=int(str(list[a]).encode("hex"),32)
-            
+
             if(h==hexa):
                 cont=False
             elif(upperbound-lowerbound<2 and h>hexa):
@@ -179,18 +179,18 @@ def findinlist(x,list):
             elif(upperbound-lowerbound<2 and h<hexa):
                 cont=False
                 a=-lowerbound
-            
+
             elif(h<hexa):
-                
+
                 upperbound=a
-                                
+
             elif(h>hexa):
-                
+
                 lowerbound=a
             elif(g>math.log(b,2)*3):
                 cont=False
                 a=-1
-                    
+
     return a
 
 
@@ -212,12 +212,12 @@ def sort():   #sort weights and weight_ids lists
         else:
             weights2.insert(place,weights[a])
             weight_ids2.insert(place,weight_ids[a])
-        
+
         a=a+1
     weights=weights2
     weight_ids=weight_ids2
 
-   
+
 
 #call this before refresh_weights
 def calculate_weights():  #sum weights, individual totals, individual adjusted amts
@@ -230,11 +230,11 @@ def calculate_weights():  #sum weights, individual totals, individual adjusted a
     g=0
     while g<len(words):
         words[g].weight=sum(words[g].connection_weight)+1
-        
+
         g=g+1
 
     popularity_exponent = 0.5 #by what degree to penalize populat words, higher is more penalized
-    
+
     number_of_words=len(words)
     f=0
     while f<len(words):        
@@ -254,7 +254,7 @@ def calculate_weights():  #sum weights, individual totals, individual adjusted a
         while t<len(words[f].connected_words):
             words[f].adjusted_weight[t]=words[f].adjusted_weight[t]/y
             t=t+1
-        
+
         f=f+1
 
 def add_weight_to_neighbors(word_id, factor):
@@ -268,13 +268,13 @@ def add_weight_to_neighbors(word_id, factor):
                a=len(weight_ids)
             a=a+1
         weights[g]=weights[g]+weights[word_id]*factor #your weight plus my weight times factor
-                
+
 
 def refresh_weights(word_id):  #creates side lists of weights and weight ids
                                  #call this before sort 
-    
+
     global weights, weight_ids
- 
+
     if word_id==-1:
         #then reset
         weights=[]
@@ -306,10 +306,10 @@ def refresh_weights(word_id):  #creates side lists of weights and weight ids
 
             #modify that weight
             #weights[s]=weights[s]*theweight/all_weights   #/node_diminution
-            
+
             weights[s]=weights[s]+theweight*all_weights
             add_weight_to_neighbors(otherword,0.3)
-            
+
             a=a+1
 
         #normalize new weights
@@ -323,7 +323,7 @@ def refresh_weights(word_id):  #creates side lists of weights and weight ids
 
 def correlated(word_id):
     a=0
-    
+
     while a<len(words[word_id].adjusted_weight):
         wordstring=words[words[word_id].connected_words[a]].theword
         weight=words[word_id].adjusted_weight[a]
@@ -337,7 +337,7 @@ def print_weights(n):
     while a<n:
         print words[weight_ids[a]].theword+"  "+str(weights[a])
         a=a+1
-  
+
 
 f=open('b.txt')
 data=f.read()
@@ -349,8 +349,8 @@ def wordcheck(word):  #so you can input strings
         #sort()
         for x in weight_ids[0:10]:
             print words[x].theword
-    
-        
+
+
 
 def refresh():
     calculate_weights()
