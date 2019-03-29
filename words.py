@@ -18,8 +18,8 @@ class word:
     connection_weight=[]
     adjusted_weight=[]
 
-    def __init__(self,theword):
-        global words,lastidused
+    def __init__(self, theword):
+        global words, lastidused
         self.theword=theword
         self.id=lastidused+1
         lastidused=lastidused+1
@@ -32,7 +32,7 @@ class word:
         for x in self.connected_words:
             print words[x].theword
 
-    def connect(self,towhom):
+    def connect(self, towhom):
         found=False
         a=0
         while a<len(self.connected_words):
@@ -66,7 +66,7 @@ def break_into_sentences(txt):
     return sentences
 
 def parse_sentence(sentence):
-    sentence=sentence.translate(None,string.punctuation)
+    sentence=sentence.translate(None, string.punctuation)
     word_list=[]
     thisword=''
 
@@ -136,8 +136,8 @@ def read(txt):
 
 
 def save():  #saves WORD OBJECT list "WORDS", does not save weights or weight_ids which can be computed
-    with open("words.dat","wb") as f:
-        pickle.dump(words,f)
+    with open("words.dat", "wb") as f:
+        pickle.dump(words, f)
 
 def load():
     global words
@@ -154,7 +154,7 @@ def findword(word):
         a=a+1
     return answer
 
-def findinlist(x,list):
+def findinlist(x, list):
     b=len(list)
     a=-1.5
     if(b>0):
@@ -162,14 +162,14 @@ def findinlist(x,list):
         upperbound=b
         a=(lowerbound+upperbound)/2
         p=b
-        h=int(str(x).encode("hex"),32)
+        h=int(str(x).encode("hex"), 32)
         depth=0
         g=0
         cont=True
         while(cont):
             g=g+1
             a=(lowerbound+upperbound)/2
-            hexa=int(str(list[a]).encode("hex"),32)
+            hexa=int(str(list[a]).encode("hex"), 32)
             
             if(h==hexa):
                 cont=False
@@ -187,7 +187,7 @@ def findinlist(x,list):
             elif(h>hexa):
                 
                 lowerbound=a
-            elif(g>math.log(b,2)*3):
+            elif(g>math.log(b, 2)*3):
                 cont=False
                 a=-1
                     
@@ -201,17 +201,17 @@ def sort():   #sort weights and weight_ids lists
     weight_ids2=[]
     a=0
     while a<len(weights):
-        place=findinlist(weights[a],weights2)
+        place=findinlist(weights[a], weights2)
 
         if place==-1.5:  #list is totally empty
             weights2.append(weights[a])
             weight_ids2.append(weight_ids[a])
         elif place<=0:  #does not exist in list, should usually be this
             weights2.insert(-1*place, weights[a])
-            weight_ids2.insert(-1*place,weight_ids[a])
+            weight_ids2.insert(-1*place, weight_ids[a])
         else:
-            weights2.insert(place,weights[a])
-            weight_ids2.insert(place,weight_ids[a])
+            weights2.insert(place, weights[a])
+            weight_ids2.insert(place, weight_ids[a])
         
         a=a+1
     weights=weights2
@@ -245,7 +245,7 @@ def calculate_weights():  #sum weights, individual totals, individual adjusted a
             internalratio=(float(words[f].connection_weight[r])/float(words[f].weight))
             toword=words[f].connected_words[r]
             massratio=float(words[toword].weight)/float(all_weights)+.001
-            adjusted=internalratio/math.pow(massratio,popularity_exponent)
+            adjusted=internalratio/math.pow(massratio, popularity_exponent)
             #print str(f)+ " to "+str(toword)+ " i: "+str(internalratio)+" / "+str(massratio)
             words[f].adjusted_weight.append(adjusted)
             r=r+1
@@ -308,7 +308,7 @@ def refresh_weights(word_id):  #creates side lists of weights and weight ids
             #weights[s]=weights[s]*theweight/all_weights   #/node_diminution
             
             weights[s]=weights[s]+theweight*all_weights
-            add_weight_to_neighbors(otherword,0.3)
+            add_weight_to_neighbors(otherword, 0.3)
             
             a=a+1
 
