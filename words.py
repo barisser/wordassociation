@@ -257,6 +257,7 @@ def calculate_weights():  #sum weights, individual totals, individual adjusted a
         
         f=f+1
 
+
 def add_weight_to_neighbors(word_id, factor):
     for x in words[word_id].connected_words:
         #find position in weight_ids
@@ -321,6 +322,7 @@ def refresh_weights(word_id):  #creates side lists of weights and weight ids
         weights[a]=weights[a]/p
         a=a+1
 
+
 def correlated(word_id):
     a=0
     
@@ -332,6 +334,7 @@ def correlated(word_id):
         we.append(weight)
         a=a+1
 
+
 def print_weights(n):
     a=0
     while a<n:
@@ -341,6 +344,7 @@ def print_weights(n):
 
 f=open('b.txt')
 data=f.read()
+
 
 def wordcheck(word):  #so you can input strings
     a=findword(word)
@@ -358,6 +362,8 @@ def refresh():
 
 
 from HTMLParser import HTMLParser
+
+
 class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
@@ -367,10 +373,12 @@ class MLStripper(HTMLParser):
     def get_data(self):
         return ''.join(self.fed)
 
+
 def strip_tags(html):
     s = MLStripper()
     s.feed(html)
     return s.get_data()
+
 
 def read_site(web_address):
     a=requests.get(web_address)
